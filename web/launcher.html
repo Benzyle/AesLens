@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AesLens美学分析工具工作台</title>
+<style>
+:root { --bg:#f6f7fb; --card:#fff; --ink:#1e2235; --ink2:#5a6072; --line:#e6e8f0;
+  --accent:#4f46e5; --accent2:#7c6cf0; --good:#059669; --bad:#dc2626; --warn:#d97706;
+  --shadow:0 1px 3px rgba(30,34,53,.07),0 4px 14px rgba(30,34,53,.05); }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--ink); font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif; font-size:14px; line-height:1.6; }
+.wrap { max-width:960px; margin:0 auto; padding:24px 20px 60px; }
+header.hero { background:linear-gradient(135deg,#4338ca 0%,#6d28d9 55%,#7c3aed 100%); border-radius:16px; padding:24px 28px; color:#fff; box-shadow:var(--shadow); margin-bottom:18px; }
+header.hero h1 { font-size:22px; letter-spacing:.5px; }
+header.hero .sub { margin-top:6px; font-size:13px; opacity:.85; }
+.badges { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+.badge { background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:4px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px; }
+.dot { width:8px; height:8px; border-radius:50%; background:#fbbf24; }
+.dot.ok { background:#34d399; } .dot.err { background:#f87171; }
+.banner { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:12px; padding:12px 16px; margin-bottom:16px; font-size:13px; display:none; }
+.panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px; }
+.panel h2 { font-size:16px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.panel h2::before { content:""; width:4px; height:16px; background:var(--accent); border-radius:2px; }
+label.fld { display:block; font-size:12px; color:var(--ink2); margin:10px 0 4px; }
+input[type=text], input[type=number], select { width:100%; border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink); }
+input:focus, select:focus { outline:none; border-color:var(--accent); }
+.row { display:flex; gap:12px; flex-wrap:wrap; }
+.row > div { flex:1; min-width:140px; }
+.models { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+.mcard { border:1px solid var(--line); border-radius:12px; padding:14px; cursor:pointer; transition:.15s; background:#fff; }
+.mcard:hover { border-color:var(--accent2); }
+.mcard.active { border-color:var(--accent); background:#f5f6ff; box-shadow:0 0 0 2px rgba(79,70,229,.12); }
+.mcard .mn { font-weight:700; font-size:15px; }
+.mcard .md { font-size:12px; color:var(--ink2); margin-top:4px; min-height:32px; }
+.mcard .mt { font-size:11px; margin-top:6px; display:inline-block; border-radius:999px; padding:2px 10px; background:#eef0f7; color:var(--ink2); }
+.mcard .mt.ok { background:#dcfce7; color:var(--good); }
+.mcard .mt.no { background:#fee2e2; color:var(--bad); }
+.model-pick { display:flex; gap:10px; flex-wrap:wrap; }
+.mpick { border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:10px; padding:10px 22px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; transition:.15s; }
+.mpick:hover { border-color:var(--accent2); }
+.mpick.active { border-color:var(--accent); background:#f5f6ff; color:var(--accent); box-shadow:0 0 0 2px rgba(79,70,229,.14); }
+.joblist { display:flex; flex-direction:column; gap:8px; }
+.jobitem { border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:10px; cursor:pointer; background:#fff; }
+.jobitem:hover { border-color:var(--accent2); }
+.jobitem.active { border-color:var(--accent); background:#f5f6ff; }
+.jobitem .ji-main { flex:1; min-width:0; }
+.jobitem .ji-name { font-weight:600; }
+.jobitem .ji-meta { font-size:11px; color:var(--ink2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.jobitem .ji-x { border:none; background:#f1f2f6; color:var(--ink2); width:26px; height:26px; border-radius:8px; cursor:pointer; font-size:13px; flex:0 0 auto; line-height:1; }
+.jobitem .ji-x:hover { background:#fee2e2; color:var(--bad); }
+.load-tag { font-size:11px; color:var(--good); flex:0 0 auto; white-space:nowrap; }
+.btn { border:none; border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+.btn.primary { background:var(--accent); color:#fff; }
+.btn.primary:disabled { background:#c7c9e6; cursor:not-allowed; }
+.btn.ghost { background:#fff; border:1px solid var(--line); color:var(--ink); }
+.btn.warn { background:#fff; border:1px solid #fecaca; color:var(--bad); }
+.btn.danger { background:#dc2626; color:#fff; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.log { background:#0f1117; color:#c9d1e0; border-radius:12px; padding:14px 16px; height:300px; overflow:auto; font-family:"SFMono-Regular",Consolas,Menlo,monospace; font-size:12px; line-height:1.5; white-space:pre-wrap; }
+.legend-note { font-size:12px; color:var(--ink2); margin-top:8px; }
+a.link { color:var(--accent); text-decoration:none; font-size:13px; border:1px solid var(--line); border-radius:9px; padding:7px 14px; background:#fff; display:inline-block; }
+a.link:hover { background:#f5f6ff; }
+.hint { font-size:11px; color:var(--ink2); margin-top:4px; }
+.mstats { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.mstat { background:#fafbff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; }
+.mstat-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.mstat-label { font-size:13px; font-weight:600; color:var(--ink); }
+.mstat-pct { font-size:18px; font-weight:800; }
+.mtrack { height:10px; border-radius:6px; background:#eef0f7; overflow:hidden; }
+.mfill { height:100%; border-radius:6px; transition:width .4s ease; }
+.mstat-val { font-size:11px; color:var(--ink2); margin-top:5px; }
+.prog-head { display:flex; justify-content:space-between; align-items:baseline; font-size:13px; color:var(--ink); margin-bottom:6px; }
+#prog-pct { font-weight:800; font-size:16px; color:var(--accent); }
+.prog-track { height:14px; border-radius:8px; background:#eef0f7; overflow:hidden; }
+.prog-fill { height:100%; border-radius:8px; background:linear-gradient(90deg,#7c6cf0,#4f46e5); transition:width .4s ease; }
+.prog-sub { display:flex; justify-content:space-between; font-size:12px; color:var(--ink2); margin-top:6px; }
+.fb-mask { position:fixed; inset:0; background:rgba(20,22,40,.5); display:none; align-items:center; justify-content:center; z-index:300; padding:20px; }
+.fb-mask.open { display:flex; }
+.fb-box { background:#fff; border-radius:14px; width:560px; max-width:96vw; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.28); }
+.fb-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+#fb-path { font-size:13px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:rtl; text-align:left; }
+.fb-x { border:none; background:#f1f2f6; width:28px; height:28px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink2); flex:0 0 auto; }
+.fb-list { flex:1; overflow:auto; padding:8px; min-height:220px; }
+.fb-item { padding:9px 12px; border-radius:8px; cursor:pointer; font-size:13.5px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+.fb-item:hover { background:#f5f6ff; color:var(--accent); }
+.fb-item .ic { color:#f59e0b; flex:0 0 auto; }
+.fb-foot { display:flex; justify-content:space-between; gap:10px; padding:12px 16px; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <h1>AesLens美学分析工具工作台 <small style="font-size:.5em;font-weight:500;color:var(--ink2);vertical-align:middle">v1.0</small></h1>
+  <div class="sub">选择模型与参数，按「作业」管理图像美学分析（ArtiMuse / UniPercept）· 图片不会被移动或修改</div>
+  <div class="badges">
+    <span class="badge"><span class="dot" id="dot-server"></span><span id="txt-server">推理服务检测中…</span></span>
+    <span class="badge"><span class="dot" id="dot-job"></span><span id="txt-job">任务空闲</span></span>
+  </div>
+</header>
+
+<div class="banner" id="banner">
+  ⚠️ 无法连接本地启动台服务。请先运行「启动台.bat」启动服务，再访问 <b>http://127.0.0.1:8081</b>（不要直接双击本文件）。
+</div>
+
+<!-- 系统资源监控（置于标题下方，按占用百分比以图形直观显示） -->
+<div class="panel monitor-panel">
+  <h2>系统资源监控</h2>
+  <div id="monitor-body"><div class="legend-note">加载中…</div></div>
+  <div class="legend-note">实时检测 CPU / 内存 / 硬盘 / GPU / 显存占用（每 2 秒刷新）。</div>
+</div>
+
+<!-- 作业管理 -->
+<div class="panel">
+  <h2>作业管理</h2>
+  <div class="row">
+    <div style="flex:2; min-width:240px">
+      <label class="fld">新建作业（填写名称，并选择图片文件夹）</label>
+      <input type="text" id="new-name" placeholder="作业名称，例如：插画集第十批">
+      <button class="btn ghost" id="btn-pick" type="button" style="margin-top:10px;width:100%">📁 选择图片文件夹</button>
+      <div class="hint" id="new-folder-display">尚未选择文件夹（点击上方按钮选取）</div>
+      <div class="actions">
+        <button class="btn primary" id="btn-new">新建作业并选中</button>
+        <button class="btn ghost" id="btn-load" type="button">📂 从 work 文件夹加载作业</button>
+      </div>
+      <div class="hint">以前分析过的作业若不在列表里（重装、换电脑等），点「加载作业」从 work/ 目录直接找回。</div>
+    </div>
+    <div style="flex:2; min-width:240px">
+      <label class="fld">已有作业（点击选中，可继续 / 重命名；右侧 ✕ 移除显示）</label>
+      <div class="joblist" id="joblist"><div class="legend-note">加载中…</div></div>
+      <div class="actions">
+        <input type="text" id="rename-input" placeholder="新作业名" style="max-width:160px">
+        <button class="btn ghost" id="btn-rename">重命名选中作业</button>
+      </div>
+    </div>
+  </div>
+  <div class="legend-note" id="job-detail">未选择作业。</div>
+</div>
+
+<!-- 模型与参数 -->
+<div class="panel">
+  <h2>模型与参数</h2>
+  <label class="fld">选择模型（点击「开始分析」后自动加载对应模型）</label>
+  <div class="model-pick" id="model-pick">
+    <button type="button" class="mpick active" data-model="unipercept_std">UniPercept</button>
+    <button type="button" class="mpick" data-model="unipercept">UniPercept-abliterated</button>
+    <button type="button" class="mpick" data-model="artimuse">ArtiMuse</button>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <div><label class="fld">并行数（workers）</label><input type="number" id="workers" value="2" min="1" max="4"></div>
+    <div><label class="fld">数量限制（0=不限）</label><input type="number" id="limit" value="0" min="0"></div>
+  </div>
+  <div class="actions" style="margin-top:14px">
+    <button class="btn primary" id="btn-start">开始分析</button>
+    <button class="btn warn" id="btn-stop">停止任务</button>
+    <a class="link" id="btn-report" href="#" target="_blank">查看报告</a>
+  </div>
+  <div id="progress-wrap" style="display:none;margin-top:14px">
+    <div class="prog-head"><span id="prog-text">准备中…</span><span id="prog-pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-sub"><span id="prog-elapsed">已用 0秒</span><span id="prog-eta"></span></div>
+  </div>
+  <div class="legend-note">开始分析会先自动启动对应模型的本地推理服务（llama-server），首次加载模型约需 1–2 分钟。</div>
+</div>
+
+<!-- 日志 -->
+<div class="panel">
+  <h2>实时日志</h2>
+  <div class="log" id="log">（等待开始…）</div>
+  <div class="actions" style="margin-top:10px">
+    <button class="btn danger" id="btn-shutdown">停止启动台服务</button>
+  </div>
+</div>
+
+<footer style="text-align:center;color:var(--ink2);font-size:12px;margin-top:20px">
+  AesLens美学分析工具工作台 · 本地推理（llama.cpp）<br>
+  <span style="font-size:11px;opacity:.85">Powered by 书生·妙析 (ArtiMuse)</span><br>
+  枋芗町美术学院 © 2026 | Created by 苄尘
+</footer>
+</div>
+
+<div class="fb-mask" id="fb-mask">
+  <div class="fb-box">
+    <div class="fb-head"><span id="fb-path">选择文件夹</span><button class="fb-x" id="fb-close" type="button">✕</button></div>
+    <div class="fb-list" id="fb-list"></div>
+    <div class="fb-foot">
+      <button class="btn ghost" id="fb-up" type="button">↑ 上级</button>
+      <button class="btn primary" id="fb-choose" type="button">选择此文件夹</button>
+    </div>
+  </div>
+</div>
+
+<div class="fb-mask" id="load-mask">
+  <div class="fb-box">
+    <div class="fb-head"><span id="load-title">加载作业（扫描 work/ 文件夹）</span><button class="fb-x" id="load-close" type="button">✕</button></div>
+    <div class="fb-list" id="load-list"></div>
+    <div class="fb-foot">
+      <span class="hint" style="flex:1">只列出含结论文件或报告的目录；已在列表中的作业不会重复加载。</span>
+      <button class="btn ghost" id="load-refresh" type="button">刷新</button>
+      <button class="btn ghost" id="load-close2" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let MODELS = [], selectedModel = "unipercept_std", selectedJob = null, jobTimer=null, logTimer=null;
+
+async function fetchJSON(u, opts){
+  try { const r = await fetch(u, Object.assign({headers:{"Content-Type":"application/json"}}, opts));
+        return await r.json(); } catch(e){ return null; }
+}
+
+function classify(line){
+  if(/!!|失败|错误|error|Error|Traceback/.test(line)) return 'style="color:var(--bad)"';
+  if(/完成|就绪|成功|done|OK|ok/.test(line)) return 'style="color:var(--good)"';
+  return '';
+}
+
+/* 启动台自身的操作结果：写入黑框日志，不用 alert 弹窗（弹窗一大坨报错太吓人）。
+   localNotes 在本地保存，refreshLog 重绘时与服务器日志行一起渲染，不会被冲掉。 */
+let localNotes=[], lastServerLines=[];
+function notify(msg,isErr){
+  let m=String(msg);
+  if(m.length>600) m=m.slice(0,600)+' …（更多细节见项目 logs/ 目录）';
+  localNotes.push({t:new Date().toTimeString().slice(0,8), msg:m, isErr:!!isErr});
+  if(localNotes.length>50) localNotes.splice(0, localNotes.length-50);
+  renderLog();
+}
+function renderLog(){
+  const el=$('#log'); if(!el) return;
+  const parts=lastServerLines.map(l=>`<div ${classify(l)}>${l.replace(/</g,'&lt;')}</div>`);
+  localNotes.forEach(n=>{
+    const cls=n.isErr?'style="color:var(--bad)"'
+      :(/完成|成功|就绪|已/.test(n.msg)?'style="color:var(--good)"':'');
+    parts.push(`<div ${cls}>[${n.t}] [启动台] ${n.msg.replace(/</g,'&lt;')}</div>`);
+  });
+  el.innerHTML=parts.join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+function setBadge(dot, txt, state){
+  dot.className = 'dot' + (state==='ok'?' ok':state==='err'?' err':'');
+  txt.textContent = txt.textContent && state==='' ? txt.textContent : (typeof txt==='string'?txt:txt.textContent);
+}
+
+async function refreshStatus(){
+  const s = await fetchJSON('/api/status');
+  if(!s){ $('#banner').style.display='block'; return; }
+  $('#banner').style.display='none';
+  const ds=$('#dot-server'), ts=$('#txt-server');
+  if(s.inference_server && s.inference_server.running){ ds.className='dot ok'; ts.textContent='推理服务运行中'; }
+  else { ds.className='dot'; ts.textContent='推理服务未启动'; }
+  const dj=$('#dot-job'), tj=$('#txt-job');
+  if(s.job && s.job.running){ dj.className='dot ok'; tj.textContent='分析中：'+s.job.model+' @ '+(s.job.job_id||''); $('#btn-stop').disabled=false; $('#btn-start').disabled=true; }
+  else { dj.className='dot'; tj.textContent='任务空闲'; $('#btn-stop').disabled=false; $('#btn-start').disabled=false; }
+  // 同步作业列表里的状态
+  if(s.jobs) renderJobList(s.jobs);
+}
+
+/* 模型选择：纯前端静态按钮（两个模型固定），不依赖任何网络请求，永远可点 */
+function initModelPick(){
+  const btns = document.querySelectorAll('#model-pick .mpick');
+  btns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.model === selectedModel);
+    btn.onclick = () => {
+      selectedModel = btn.dataset.model;
+      btns.forEach(b => b.classList.toggle('active', b === btn));
+    };
+  });
+}
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderJobList(jobs){
+  const box=$('#joblist');
+  if(!jobs.length){ box.innerHTML='<div class="legend-note">暂无作业，请在左侧新建或加载。</div>'; return; }
+  box.innerHTML='';
+  jobs.forEach(j=>{
+    const it=document.createElement('div');
+    it.className='jobitem'+(j.id===selectedJob?' active':'');
+    const cnt=Object.entries(j.counts||{}).map(([k,v])=>`${k}:${v}`).join(' / ')||'-';
+    it.innerHTML=`<div class="ji-main"><div class="ji-name">${esc(j.name)}</div>`+
+      `<div class="ji-meta">${esc(j.folder||'')} · ${j.status||''} · ${cnt}</div></div>`;
+    const x=document.createElement('button');
+    x.className='ji-x'; x.type='button'; x.title='移除该作业的显示'; x.textContent='✕';
+    x.onclick=(ev)=>{ ev.stopPropagation(); removeJob(j.id, j.name); };
+    it.appendChild(x);
+    it.onclick=()=>{ selectedJob=j.id; $('#job-detail').textContent=`已选作业：${j.name}（${j.id}）\n文件夹：${j.folder||'-'}\n状态：${j.status||'-'}`; renderJobList(jobs); updateReportLink(); };
+    box.appendChild(it);
+  });
+}
+
+function updateReportLink(){
+  if(selectedJob){ $('#btn-report').href='/api/report?job='+encodeURIComponent(selectedJob); $('#btn-report').style.display='inline-block'; }
+  else { $('#btn-report').href='/api/report'; $('#btn-report').style.display='inline-block'; }
+}
+
+async function refreshLog(){
+  const d=await fetchJSON('/api/log?n=200');
+  if(d&&d.lines){ lastServerLines=d.lines; renderLog(); }
+}
+
+async function refreshStats(){
+  const s=await fetchJSON('/api/stats');
+  const body=document.getElementById('monitor-body'); if(!body) return;
+  if(!s){ body.innerHTML='<div class="legend-note">监控数据不可用</div>'; return; }
+  if(s.error){ body.innerHTML='<div class="legend-note">'+s.error+'</div>'; return; }
+  const metric=(label,val,total,unit,grad)=>{
+    const p = total ? Math.min(100, Math.round(val/total*100)) : 0;
+    const color = p < 60 ? 'var(--good)' : (p < 85 ? 'var(--warn)' : 'var(--bad)');
+    const g = grad || `linear-gradient(90deg, ${color}, ${color})`;
+    return `<div class="mstat">
+      <div class="mstat-top"><span class="mstat-label">${label}</span><span class="mstat-pct" style="color:${color}">${p}%</span></div>
+      <div class="mtrack"><div class="mfill" style="width:${p}%;background:${g}"></div></div>
+      <div class="mstat-val">${Number(val).toFixed(1)} / ${Number(total).toFixed(1)} ${unit}</div>
+    </div>`;
+  };
+  let h='<div class="mstats">';
+  h+=metric('CPU', +(s.cpu||0), 100, '%');
+  h+=metric('内存', +(s.mem_used||0), +(s.mem_total||1), 'GB');
+  if(s.gpu_util!=null) h+=metric('GPU 利用率', s.gpu_util, 100, '%', 'linear-gradient(90deg,#f59e0b,#d97706)');
+  else h+='<div class="mstat"><div class="mstat-top"><span class="mstat-label">GPU</span><span class="mstat-pct" style="color:var(--ink2)">N/A</span></div><div class="mtrack"><div class="mfill" style="width:0%"></div></div><div class="mstat-val">未检测到 nvidia-smi</div></div>';
+  if(s.vram_total) h+=metric('显存', s.vram_used, s.vram_total, 'GB', 'linear-gradient(90deg,#ec4899,#be185d)');
+  h+='</div>';
+  h+='<div class="legend-note">更新时间：'+(s.time||'')+(s.gpu_name?(' · '+s.gpu_name):'')+'</div>';
+  body.innerHTML=h;
+}
+
+function fmtDur(s){
+  s = Math.round(s || 0);
+  if (s >= 3600) { const h = Math.floor(s/3600), m = Math.floor((s%3600)/60); return h + '小时' + m + '分'; }
+  const m = Math.floor(s/60), ss = s % 60;
+  return m > 0 ? (m + '分' + ss + '秒') : (ss + '秒');
+}
+
+async function refreshProgress(){
+  const wrap = document.getElementById('progress-wrap'); if(!wrap) return;
+  if(!selectedJob || !selectedModel){ wrap.style.display='none'; return; }
+  const d = await fetchJSON('/api/progress?job='+encodeURIComponent(selectedJob)+'&model='+encodeURIComponent(selectedModel));
+  if(!d || !d.total){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  const pct = d.pct || 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-text').textContent = '已完成 ' + d.done + ' / ' + d.total + ' 张' + (d.running ? '（分析中）' : '');
+  document.getElementById('prog-elapsed').textContent = '已用 ' + fmtDur(d.elapsed || 0);
+  document.getElementById('prog-eta').textContent = d.eta != null ? ('预计剩余 ' + fmtDur(d.eta)) : (d.running ? '预计剩余 计算中…' : '');
+}
+
+async function init(){
+  initModelPick();
+  const j=await fetchJSON('/api/jobs');
+  if(j){ if(j.jobs&&j.jobs.length){ selectedJob=j.jobs[0].id; } renderJobList(j.jobs||[]); updateReportLink(); }
+  await refreshStatus();
+  await refreshLog();
+  jobTimer=setInterval(refreshStatus,3000);
+  logTimer=setInterval(refreshLog,2500);
+  setInterval(refreshStats,2000);
+  setInterval(refreshProgress,2000);
+  refreshStats();
+  refreshProgress();
+}
+
+let selectedFolder = "";
+let fbPath = "", fbParent = null;
+async function fbLoad(p){
+  const d = await fetchJSON('/api/browse?path='+encodeURIComponent(p||''));
+  if(!d){ return; }
+  fbPath = d.path || "";
+  fbParent = (d.parent === undefined ? null : d.parent);
+  document.getElementById('fb-path').textContent = fbPath || '选择磁盘 / 文件夹';
+  const list = document.getElementById('fb-list');
+  list.innerHTML = '';
+  if(d.error){ list.innerHTML = '<div class="legend-note">'+d.error+'</div>'; }
+  else if(!d.dirs || !d.dirs.length){ list.innerHTML = '<div class="legend-note">（无子文件夹）</div>'; }
+  else {
+    d.dirs.forEach(it=>{
+      const el = document.createElement('div');
+      el.className = 'fb-item';
+      el.innerHTML = '<span class="ic">📁</span><span>'+String(it.name).replace(/</g,'&lt;')+'</span>';
+      el.onclick = ()=> fbLoad(it.path);
+      list.appendChild(el);
+    });
+  }
+  document.getElementById('fb-up').disabled = (fbParent === null);
+}
+function fbOpen(){
+  document.getElementById('fb-mask').classList.add('open');
+  fbLoad(selectedFolder || '');
+}
+$('#btn-pick').onclick = ()=> fbOpen();
+$('#fb-close').onclick = ()=> document.getElementById('fb-mask').classList.remove('open');
+$('#fb-up').onclick = ()=> { if(fbParent !== null) fbLoad(fbParent); };
+$('#fb-choose').onclick = ()=>{
+  if(!fbPath){ notify('请先进入一个文件夹再选择', true); return; }
+  selectedFolder = fbPath;
+  $('#new-folder-display').textContent = '已选文件夹：' + fbPath;
+  document.getElementById('fb-mask').classList.remove('open');
+};
+$('#fb-mask').onclick = (e)=>{ if(e.target.id === 'fb-mask') document.getElementById('fb-mask').classList.remove('open'); };
+
+/* ---------- 移除作业显示（文件默认保留在 work/，可再用「加载作业」找回） ---------- */
+async function removeJob(id, name){
+  if(!confirm('移除作业「'+name+'」的显示？\n\n【确定】仅从启动台列表移除（文件保留在 work/ 文件夹，之后可用「加载作业」找回）\n【取消】返回')) return;
+  let del = false;
+  if(confirm('是否同时删除该作业在 work/ 文件夹下的文件（结论 / 报告 / 缩略图）？\n\n【确定】连文件一起删除（不可恢复！）\n【取消】仅移除显示，保留文件')) del = true;
+  const r=await fetchJSON('/api/job/remove',{method:'POST',body:JSON.stringify({id, delete_files:del})});
+  if(r&&r.ok){
+    if(selectedJob===id){ selectedJob=null; $('#job-detail').textContent='未选择作业。'; updateReportLink(); document.getElementById('progress-wrap').style.display='none'; }
+    const j=await fetchJSON('/api/jobs'); if(j) renderJobList(j.jobs||[]);
+    notify(del?'已移除作业，并删除 work/ 下的文件':'已移除作业显示（文件保留在 work/ 文件夹，可再加载）');
+  }
+  else notify('移除失败：'+((r&&r.error)||'未知错误'), true);
+}
+
+/* ---------- 从 work/ 文件夹加载已有作业 ---------- */
+async function refreshLoadList(){
+  const box=document.getElementById('load-list');
+  box.innerHTML='<div class="legend-note">扫描中…</div>';
+  const d=await fetchJSON('/api/workdirs');
+  if(!d){ box.innerHTML='<div class="legend-note">获取失败（启动台服务无响应）</div>'; return; }
+  if(!d.dirs.length){ box.innerHTML='<div class="legend-note">work/ 下没有可加载的作业目录</div>'; return; }
+  box.innerHTML='';
+  d.dirs.forEach(it=>{
+    const el=document.createElement('div');
+    el.className='fb-item';
+    const ms=Object.entries(it.models||{}).map(([k,v])=>k+': '+v).join(' · ')||'（无结论文件）';
+    el.innerHTML='<span class="ic">📁</span><span style="flex:1;min-width:0"><b>'+esc(it.folder)+'</b><br>'+
+      '<span style="font-size:11px;color:var(--ink2)">'+esc(ms)+' · 报告'+(it.has_report?'✓':'✗')+' · '+esc(it.mtime)+'</span></span>'+
+      (it.registered?'<span class="load-tag">已在列表中</span>':'');
+    if(!it.registered){
+      const b=document.createElement('button');
+      b.className='btn primary'; b.type='button'; b.textContent='加载';
+      b.style.padding='5px 14px'; b.style.fontSize='12px'; b.style.flex='0 0 auto';
+      b.onclick=async(ev)=>{ ev.stopPropagation(); await doLoad(it.folder); };
+      el.appendChild(b);
+    }
+    box.appendChild(el);
+  });
+}
+async function doLoad(folder){
+  const r=await fetchJSON('/api/job/load',{method:'POST',body:JSON.stringify({folder})});
+  if(r&&r.ok){
+    selectedJob=r.job.id;
+    document.getElementById('load-mask').classList.remove('open');
+    const j=await fetchJSON('/api/jobs'); if(j) renderJobList(j.jobs||[]);
+    $('#job-detail').textContent='已加载作业：'+r.job.name+'（'+r.job.id+'）\n来源：work/'+folder+'（未记录图片目录，仅支持查看 / 生成报告）';
+    updateReportLink(); refreshProgress();
+    notify('已加载作业：'+r.job.name+'（work/'+folder+'）');
+  }
+  else { notify('加载失败：'+((r&&r.error)||'未知错误'), true); await refreshLoadList(); }
+}
+function openLoadModal(){
+  document.getElementById('load-mask').classList.add('open');
+  refreshLoadList();
+}
+$('#btn-load').onclick=()=>openLoadModal();
+$('#load-close').onclick=()=>document.getElementById('load-mask').classList.remove('open');
+$('#load-close2').onclick=()=>document.getElementById('load-mask').classList.remove('open');
+$('#load-refresh').onclick=()=>refreshLoadList();
+$('#load-mask').onclick=(e)=>{ if(e.target.id==='load-mask') document.getElementById('load-mask').classList.remove('open'); };
+
+$('#btn-new').onclick=async()=>{
+  const name=$('#new-name').value.trim()||'新建作业';
+  if(!selectedFolder){ notify('请先点击「选择图片文件夹」选取图片目录', true); return; }
+  const r=await fetchJSON('/api/job/new',{method:'POST',body:JSON.stringify({name,folder:selectedFolder,model:selectedModel})});
+  if(r&&r.ok){ selectedJob=r.id; const j=await fetchJSON('/api/jobs'); if(j) renderJobList(j.jobs||[]); $('#job-detail').textContent=`已选作业：${r.name}（${r.id}）\n文件夹：${r.folder||'-'}`; updateReportLink(); notify('已新建并选中作业：'+r.name+'（'+r.id+'），选好模型后点「开始分析」'); }
+  else notify('新建作业失败：'+((r&&r.error)||'未知错误'), true);
+};
+
+$('#btn-rename').onclick=async()=>{
+  if(!selectedJob){ notify('请先选中一个作业', true); return; }
+  const name=$('#rename-input').value.trim();
+  if(!name){ notify('请填写新名称', true); return; }
+  const r=await fetchJSON('/api/job/rename',{method:'POST',body:JSON.stringify({id:selectedJob,name})});
+  if(r&&r.ok){ const j=await fetchJSON('/api/jobs'); if(j) renderJobList(j.jobs||[]); $('#job-detail').textContent='已重命名为：'+name; notify('已重命名作业为：'+name); }
+  else notify('重命名失败：'+((r&&r.error)||'未知错误'), true);
+};
+
+$('#btn-start').onclick=async()=>{
+  if(!selectedJob){ notify('请先新建或选择一个作业', true); return; }
+  if(!selectedModel){ notify('请选择模型', true); return; }
+  const workers=parseInt($('#workers').value)||2;
+  const limit=parseInt($('#limit').value)||0;
+  const r=await fetchJSON('/api/start',{method:'POST',body:JSON.stringify({job_id:selectedJob,model:selectedModel,workers,limit})});
+  if(r&&r.ok){ notify('已启动分析任务（'+r.model+'），下方查看进度，报告将自动生成'); await refreshStatus(); refreshProgress(); }
+  else notify('启动失败：'+((r&&r.error)||'未知错误'), true);
+};
+
+$('#btn-stop').onclick=async()=>{
+  const r=await fetchJSON('/api/stop',{method:'POST',body:'{}'});
+  notify(r&&r.ok?'已发送停止指令（分析任务与推理服务都会停止）':'停止失败', !(r&&r.ok));
+  await refreshStatus();
+};
+
+$('#btn-shutdown').onclick=async()=>{
+  if(!confirm('确定停止启动台服务（http://127.0.0.1:8081）？')) return;
+  await fetchJSON('/api/shutdown',{method:'POST',body:'{}'});
+  $('#banner').style.display='block'; $('#txt-server').textContent='启动台已停止';
+};
+
+init();
+</script>
+</body>
+</html>
