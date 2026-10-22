@@ -279,7 +279,7 @@ python uninstall.py --yes      # 无交互：执行「以上全部」
 顶部的表格把文件名和目录结构放对，再运行 `python setup.py`：已存在的文件会自动跳过，
 **本地文件齐全时全程不访问模型站，断网也能装完**。下到一半改用其他途径：删掉中断残留的
 `.part` 临时文件、放上完整文件，重跑同一命令即可。ArtiMuse 的 safetensors 放
-`models/artimuse/hf/`。详见 docs/models.md「无法访问模型下载站时」。
+`models/artimuse/`。详见 docs/models.md「无法访问模型下载站时」。
 
 ## 致谢
 
