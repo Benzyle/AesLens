@@ -1,0 +1,77 @@
+AesLens美学分析工具 — 第三方组件与模型许可声明（NOTICE）
+================================================================================
+
+本文件汇总本工具所使用（或安装时自动下载）的第三方组件与模型，以及各自的
+版权归属与许可条款。
+
+本工具自身的源代码以 MIT 许可发布，见 LICENSE。本文件不改变、也不扩大任何
+第三方组件或模型各自的许可条款；各组件仍以其原始许可为准。
+
+--------------------------------------------------------------------------------
+一、模型权重（不随本仓库分发）
+
+本工具仓库不包含任何模型权重文件：models/ 目录已被 .gitignore 排除，权重由
+setup.py 从 Hugging Face 上游仓库下载，或由用户自行放置。因此模型权重是用户
+直接从其原作者处取得，不在本仓库的分发范围内。
+
+  模型                     上游仓库（Hugging Face）                    许可
+  -----------------------  ------------------------------------------  ----------
+  UniPercept               Thunderbolt215215/UniPercept                Apache-2.0
+  UniPercept-abliterated   Thunderbolt215215/UniPercept                Apache-2.0
+  UniPercept GGUF 转换版    AX1Y2JP/UniPercept-GGUF                      Apache-2.0
+  UniPercept-abliterated   AX1Y2JP/UniPercept-abliterated-GGUF          Apache-2.0
+  GGUF 转换版
+  ArtiMuse                 Thunderbolt215215/ArtiMuse                  Apache-2.0
+
+  说明：UniPercept-abliterated 是在 UniPercept 权重上做「拒绝行为移除」（abliteration）
+  的社区衍生版；两个 GGUF 仓库是上述权重由社区转换出的量化版本。
+
+基座模型：
+
+  UniPercept 与 ArtiMuse 均基于 OpenGVLab/InternVL3-8B（Hugging Face 元数据
+  标注 license: apache-2.0）。该模型卡的 license_name 字段另有 "qwen" 标记，
+  若用于商业场景，请自行核对上游模型卡与基座模型的许可条款。
+
+--------------------------------------------------------------------------------
+二、推理引擎与运行库
+
+  llama.cpp                https://github.com/ggml-org/llama.cpp          MIT
+                           （setup.py 下载其预编译二进制；OpenMP 运行时
+                            另附 LLVM OpenMP 许可，见 tools/llama-vulkan/
+                            LICENSE-LLVM-OpenMP）
+  Pillow                   https://python-pillow.org                       MIT-CMU
+                           （HPND 许可，requirements.txt 中声明的唯一依赖）
+
+--------------------------------------------------------------------------------
+三、前端库
+
+  Chart.js v4.5.1          https://www.chartjs.org                         MIT
+                           （vendor/chart.umd.js，生成报告时内联进 HTML）
+
+--------------------------------------------------------------------------------
+四、关于 Apache License 2.0 的说明
+
+本工具自身的代码以 MIT 许可发布，不是 Apache-2.0 作品，因此 Apache-2.0 第 4 条
+（再分发义务）不直接作用于本仓库的代码。
+
+但请注意：若你分发包含上述模型权重的衍生包（例如把 models/ 一起打包分发），
+则属于对 Apache-2.0 作品的再分发，需要遵守 Apache License 2.0 第 4 条，包括
+随附许可证副本（第 4(a) 条）、保留版权与归属声明（第 4(c) 条），以及在上游
+提供 NOTICE 文件时一并传递其归属声明（第 4(d) 条）。
+
+截至 2026 年 10 月核对：上述模型仓库（含基座 InternVL3-8B）在 Hugging Face
+上均只提供 README 与权重文件，未提供 NOTICE 文件，故当前不存在必须传递的上游
+NOTICE 内容。若上游日后新增 NOTICE，再分发时应一并传递。
+
+--------------------------------------------------------------------------------
+五、版权与致谢
+
+  UniPercept / ArtiMuse 模型        © Thunderbolt215215 及其合作者
+  UniPercept GGUF 转换              © AX1Y2JP
+  基座 InternVL3                    © OpenGVLab
+  llama.cpp                         © The ggml authors
+  Chart.js                          © Chart.js contributors
+  Pillow                            © Pillow contributors
+
+各项目的完整许可文本请查阅其上游仓库。任何商标、名称仅用于指明来源，
+不表示原作者对本工具的认可或背书。
